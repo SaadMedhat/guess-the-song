@@ -12,6 +12,7 @@ type GameOverProps = {
   readonly rounds: ReadonlyArray<RoundResult>
   readonly onPlayAgain: () => void
   readonly onHome: () => void
+  readonly subtitle?: string | undefined
 }
 
 export const GameOver = ({
@@ -22,6 +23,7 @@ export const GameOver = ({
   rounds,
   onPlayAgain,
   onHome,
+  subtitle,
 }: GameOverProps): React.ReactElement => {
   const accuracy =
     totalRounds > 0 ? Math.round((correctAnswers / totalRounds) * 100) : 0
@@ -37,6 +39,11 @@ export const GameOver = ({
         <h2 className="font-display text-2xl font-bold text-foreground">
           Fine partita
         </h2>
+        {subtitle !== undefined && (
+          <p className="text-sm font-medium text-muted-foreground">
+            {subtitle}
+          </p>
+        )}
       </motion.div>
 
       <motion.div

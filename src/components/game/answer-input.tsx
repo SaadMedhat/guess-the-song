@@ -129,10 +129,10 @@ export const AnswerInput = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute top-full z-50 mt-1 w-full overflow-hidden rounded-xl border border-border bg-card shadow-2xl"
-            initial={{ opacity: 0, y: -4 }}
+            className="absolute bottom-full z-50 mb-1 max-h-64 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-2xl"
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.15 }}
           >
             {isLoading && (
