@@ -309,17 +309,7 @@ export default function ClassicPage(): React.ReactElement {
   // --- GAMEPLAY ---
   return (
     <main className="relative flex min-h-dvh flex-col bg-gradient-game">
-      {/* Exit button */}
-      <button
-        type="button"
-        onClick={handleExit}
-        className="absolute top-4 right-4 z-50 flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
-        aria-label="Esci dal gioco"
-      >
-        ✕
-      </button>
-
-      {/* Top bar: round + score + streak */}
+      {/* Top bar: round + score + exit */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <RoundIndicator
           current={state.currentRound}
@@ -328,6 +318,14 @@ export default function ClassicPage(): React.ReactElement {
         <div className="flex items-center gap-3">
           <StreakCounter streak={state.streak} />
           <ScoreDisplay score={state.score} />
+          <button
+            type="button"
+            onClick={handleExit}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+            aria-label="Esci dal gioco"
+          >
+            ✕
+          </button>
         </div>
       </div>
 

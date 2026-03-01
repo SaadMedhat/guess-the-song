@@ -107,3 +107,13 @@ export const pulseGlow: Variants = {
     transition: { duration: 1.5, repeat: Infinity },
   },
 }
+
+export const multiplierPop: Variants = {
+  hidden: { opacity: 0, scale: 0.5 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring", stiffness: 500, damping: 15 },
+  },
+  exit: { opacity: 0, scale: 0.8, transition: { duration: 0.15 } },
+}

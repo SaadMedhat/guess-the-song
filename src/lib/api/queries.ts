@@ -8,7 +8,7 @@ import {
   getGenres,
   getArtistTop,
 } from "./deezer-client"
-import { getClassicPool, getChallengePool, getDecadePool } from "./track-pool"
+import { getClassicPool, getTimedPool, getChallengePool, getDecadePool } from "./track-pool"
 
 const STALE_TIME_CHART = 1000 * 60 * 30
 const STALE_TIME_SEARCH = 0
@@ -55,6 +55,15 @@ export const useClassicPool = (enabled: boolean = true) =>
   useQuery({
     queryKey: ["pool", "classic"],
     queryFn: () => getClassicPool(),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+  })
+
+export const useTimedPool = (enabled: boolean = true) =>
+  useQuery({
+    queryKey: ["pool", "timed"],
+    queryFn: () => getTimedPool(),
     enabled,
     staleTime: 0,
     gcTime: 0,
