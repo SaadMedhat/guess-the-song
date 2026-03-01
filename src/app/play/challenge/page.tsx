@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useCallback, useRef, useMemo } from "react"
+import { Suspense, useEffect, useCallback, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGameEngine } from "@/hooks/use-game-engine"
@@ -69,6 +69,23 @@ const useChallengeParams = (): {
 }
 
 export default function ChallengePage(): React.ReactElement {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-game px-5">
+          <AudioVisualizer isPlaying barCount={20} />
+          <p className="font-display text-lg font-semibold text-foreground">
+            Caricamento...
+          </p>
+        </main>
+      }
+    >
+      <ChallengeContent />
+    </Suspense>
+  )
+}
+
+function ChallengeContent(): React.ReactElement {
   const router = useRouter()
   const { type, genreId, decade, label } = useChallengeParams()
 
