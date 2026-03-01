@@ -12,31 +12,29 @@ const normalize = (str: string): string =>
  * Levenshtein distance between two strings.
  */
 const levenshtein = (a: string, b: string): number => {
-  const rows = a.length + 1
   const cols = b.length + 1
+  const initialRow = Array.from({ length: cols }, (_, i) => i)
 
-  const prev = Array.from({ length: cols }, (_, i) => i)
-  const curr = Array.from({ length: cols }, () => 0)
-
-  return Array.from({ length: a.length }, (_, i) => i).reduce((_, rowIdx) => {
-    curr[0] = rowIdx + 1
-
-    Array.from({ length: b.length }, (__, j) => j).reduce((__, colIdx) => {
-      const cost = a[rowIdx] === b[colIdx] ? 0 : 1
-      curr[colIdx + 1] = Math.min(
-        (prev[colIdx + 1] ?? 0) + 1,
-        (curr[colIdx] ?? 0) + 1,
-        (prev[colIdx] ?? 0) + cost
+  const finalRow = Array.from(a).reduce<ReadonlyArray<number>>(
+    (prev, charA, rowIdx) => {
+      const row = Array.from(b).reduce<ReadonlyArray<number>>(
+        (curr, charB, colIdx) => {
+          const cost = charA === charB ? 0 : 1
+          const value = Math.min(
+            (prev[colIdx + 1] ?? 0) + 1,
+            (curr[colIdx] ?? 0) + 1,
+            (prev[colIdx] ?? 0) + cost
+          )
+          return [...curr, value]
+        },
+        [rowIdx + 1]
       )
-      return null
-    }, null)
+      return row
+    },
+    initialRow
+  )
 
-    prev.splice(0, prev.length, ...curr)
-    return null
-  }, null) as unknown as number
-
-  // The result is in prev[b.length] after all iterations
-  return prev[b.length] ?? Infinity
+  return finalRow[b.length] ?? Infinity
 }
 
 /**
