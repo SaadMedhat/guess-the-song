@@ -1,7 +1,7 @@
 "use client"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useStatsStore } from "@/lib/stores/stats-store"
 
 const StatsHydration = (): null => {
@@ -16,21 +16,20 @@ export const Providers = ({
 }: {
   readonly children: React.ReactNode
 }): React.ReactElement => {
-  const queryClientRef = useRef<QueryClient | null>(null)
-
-  if (queryClientRef.current === null) {
-    queryClientRef.current = new QueryClient({
-      defaultOptions: {
-        queries: {
-          refetchOnWindowFocus: false,
-          retry: 2,
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            retry: 2,
+          },
         },
-      },
-    })
-  }
+      })
+  )
 
   return (
-    <QueryClientProvider client={queryClientRef.current}>
+    <QueryClientProvider client={queryClient}>
       <StatsHydration />
       {children}
     </QueryClientProvider>

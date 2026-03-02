@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 
 type AudioVisualizerProps = {
   readonly isPlaying: boolean
@@ -14,29 +14,33 @@ export const AudioVisualizer = ({
   isPlaying,
   barCount = BAR_COUNT_DEFAULT,
 }: AudioVisualizerProps): React.ReactElement => {
+  const prefersReducedMotion = useReducedMotion()
+
   const [heights, setHeights] = useState<ReadonlyArray<number>>(
     Array.from({ length: barCount }, () => 0.15)
   )
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setHeights(
-          Array.from({ length: barCount }, () =>
-            0.15 + Math.random() * 0.85
-          )
-        )
-      }, 120)
-    }
+  // Derive static display heights when not animating (paused or reduced-motion)
+  const displayHeights =
+    prefersReducedMotion === true || !isPlaying
+      ? Array.from({ length: barCount }, (): number => (isPlaying ? 0.5 : 0.15))
+      : heights
 
-    if (!isPlaying) {
+  useEffect(() => {
+    if (prefersReducedMotion === true || !isPlaying) {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      setHeights(Array.from({ length: barCount }, () => 0.15))
+      return
     }
+
+    intervalRef.current = setInterval(() => {
+      setHeights(
+        Array.from({ length: barCount }, () => 0.15 + Math.random() * 0.85)
+      )
+    }, 120)
 
     return (): void => {
       if (intervalRef.current !== null) {
@@ -44,7 +48,7 @@ export const AudioVisualizer = ({
         intervalRef.current = null
       }
     }
-  }, [isPlaying, barCount])
+  }, [isPlaying, barCount, prefersReducedMotion])
 
   return (
     <div
@@ -52,7 +56,7 @@ export const AudioVisualizer = ({
       aria-label={isPlaying ? "Audio in riproduzione" : "Audio in pausa"}
       role="img"
     >
-      {heights.map((height, index) => (
+      {displayHeights.map((height, index) => (
         <motion.div
           key={index}
           className="w-1 rounded-full bg-primary"
@@ -60,7 +64,7 @@ export const AudioVisualizer = ({
             height: `${height * 100}%`,
             opacity: isPlaying ? 0.6 + height * 0.4 : 0.2,
           }}
-          transition={{ duration: 0.1, ease: "easeOut" }}
+          transition={{ duration: prefersReducedMotion === true ? 0 : 0.1, ease: "easeOut" }}
         />
       ))}
     </div>

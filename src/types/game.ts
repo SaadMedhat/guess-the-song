@@ -86,3 +86,40 @@ export const TIMED_MULTIPLIERS: Readonly<Record<TimedStep, number>> = {
   15: 1.5,
   30: 1,
 }
+
+// --- Local Multiplayer ---
+
+export type LocalGamePhase =
+  | "IDLE"
+  | "LOADING_TRACKS"
+  | "READY"
+  | "BUZZER_WAIT"
+  | "PLAYER_ANSWERING"
+  | "ANSWER_CORRECT"
+  | "ANSWER_WRONG"
+  | "ROUND_OVER"
+  | "GAME_OVER"
+
+export type LocalRoundResult = {
+  readonly roundNumber: number
+  readonly track: DeezerTrack
+  readonly winnerId: string | null
+  readonly winnerName: string | null
+  readonly pointsEarned: number
+  readonly buzzOrder: ReadonlyArray<string>
+  readonly timeUsed: number
+}
+
+export type LocalGameState = {
+  readonly phase: LocalGamePhase
+  readonly players: ReadonlyArray<Player>
+  readonly currentRound: number
+  readonly totalRounds: number
+  readonly trackPool: ReadonlyArray<DeezerTrack>
+  readonly currentTrack: DeezerTrack | null
+  readonly answeringPlayerId: string | null
+  readonly eliminatedPlayerIds: ReadonlyArray<string>
+  readonly roundResults: ReadonlyArray<LocalRoundResult>
+}
+
+export const BUZZER_ANSWER_TIME = 10

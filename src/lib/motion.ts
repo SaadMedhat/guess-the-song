@@ -117,3 +117,20 @@ export const multiplierPop: Variants = {
   },
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.15 } },
 }
+
+export const podiumRise: Variants = {
+  hidden: { height: 0, opacity: 0 },
+  visible: {
+    height: "var(--podium-height)",
+    opacity: 1,
+    transition: { type: "spring", stiffness: 100, damping: 20 },
+  },
+}
+
+export const buzzerPulse: Variants = {
+  idle: { scale: 1 },
+  pulse: {
+    scale: [1, 1.04, 1],
+    transition: { duration: 1.2, repeat: Infinity },
+  },
+}

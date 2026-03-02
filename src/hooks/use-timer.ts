@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react"
 
 type UseTimerOptions = {
   readonly duration: number
@@ -26,7 +26,9 @@ export const useTimer = ({
   const [isRunning, setIsRunning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const onTimeoutRef = useRef(onTimeout)
-  onTimeoutRef.current = onTimeout
+  useLayoutEffect(() => {
+    onTimeoutRef.current = onTimeout
+  })
 
   const clearTimer = useCallback((): void => {
     if (intervalRef.current !== null) {

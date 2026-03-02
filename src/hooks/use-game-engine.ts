@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useLayoutEffect } from "react"
 import type {
   GameState,
   GameConfig,
@@ -55,7 +55,9 @@ type UseGameEngineReturn = {
 export const useGameEngine = (): UseGameEngineReturn => {
   const [state, setState] = useState<GameState>(INITIAL_STATE)
   const stateRef = useRef(state)
-  stateRef.current = state
+  useLayoutEffect(() => {
+    stateRef.current = state
+  })
 
   const setPhase = useCallback((phase: GamePhase): void => {
     setState((prev) => ({ ...prev, phase }))

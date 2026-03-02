@@ -1,21 +1,28 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 
 const BAR_COUNT = 32
 
+const staticWave = Array.from({ length: BAR_COUNT }, (_, i) => {
+  const center = BAR_COUNT / 2
+  const distFromCenter = Math.abs(i - center) / center
+  return 0.15 + (1 - distFromCenter) * 0.4
+})
+
 export const HeroVisualizer = (): React.ReactElement => {
-  const [heights, setHeights] = useState<ReadonlyArray<number>>(
-    Array.from({ length: BAR_COUNT }, () => 0.1)
-  )
+  const prefersReducedMotion = useReducedMotion()
+
+  const [heights, setHeights] = useState<ReadonlyArray<number>>(staticWave)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    if (prefersReducedMotion === true) return
+
     intervalRef.current = setInterval(() => {
       setHeights(
         Array.from({ length: BAR_COUNT }, (_, i) => {
-          // Create a wave pattern that moves from center outward
           const center = BAR_COUNT / 2
           const distFromCenter = Math.abs(i - center) / center
           const base = 0.15 + (1 - distFromCenter) * 0.4
@@ -29,7 +36,7 @@ export const HeroVisualizer = (): React.ReactElement => {
         clearInterval(intervalRef.current)
       }
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
     <div
@@ -41,7 +48,7 @@ export const HeroVisualizer = (): React.ReactElement => {
           key={index}
           className="w-1.5 rounded-full bg-primary"
           animate={{ height: `${height * 100}%` }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{ duration: prefersReducedMotion === true ? 0 : 0.2, ease: "easeOut" }}
         />
       ))}
     </div>

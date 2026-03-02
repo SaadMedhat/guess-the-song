@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 
 type TimerBarProps = {
   readonly percentage: number
@@ -19,11 +19,22 @@ export const TimerBar = ({
   timeRemaining,
   isRunning,
 }: TimerBarProps): React.ReactElement => {
+  const prefersReducedMotion = useReducedMotion()
   const barColor = getBarColor(percentage)
 
   return (
-    <div className="flex w-full items-center gap-3">
-      <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+    <div
+      className="flex w-full items-center gap-3"
+      role="timer"
+      aria-label={`${Math.ceil(timeRemaining)} secondi rimanenti`}
+    >
+      <div
+        className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-valuenow={Math.ceil(timeRemaining)}
+        aria-valuemin={0}
+        aria-valuemax={Math.ceil(timeRemaining / (percentage > 0 ? percentage : 1))}
+      >
         <motion.div
           className={`absolute inset-y-0 left-0 rounded-full ${barColor}`}
           initial={{ scaleX: 1 }}
@@ -33,7 +44,7 @@ export const TimerBar = ({
           }}
           style={{ transformOrigin: "left" }}
         />
-        {isRunning && percentage <= 0.25 && (
+        {isRunning && percentage <= 0.25 && prefersReducedMotion !== true && (
           <motion.div
             className="absolute inset-0 rounded-full bg-destructive/30"
             animate={{ opacity: [0.3, 0.7, 0.3] }}

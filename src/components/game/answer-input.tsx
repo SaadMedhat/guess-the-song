@@ -88,13 +88,16 @@ export const AnswerInput = ({
   )
 
   useEffect(() => {
-    if (debouncedValue.length >= 2 && suggestions.length > 0) {
-      setIsOpen(true)
-      setSelectedIndex(-1)
-    }
-    if (debouncedValue.length < 2) {
-      setIsOpen(false)
-    }
+    const id = setTimeout(() => {
+      if (debouncedValue.length >= 2 && suggestions.length > 0) {
+        setIsOpen(true)
+        setSelectedIndex(-1)
+      }
+      if (debouncedValue.length < 2) {
+        setIsOpen(false)
+      }
+    }, 0)
+    return (): void => clearTimeout(id)
   }, [debouncedValue, suggestions.length])
 
   useEffect(() => {
@@ -120,15 +123,21 @@ export const AnswerInput = ({
         disabled={isDisabled}
         placeholder={placeholder}
         className="h-12 w-full rounded-xl border border-border bg-card px-4 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+        role="combobox"
         aria-label="La tua risposta"
         aria-autocomplete="list"
         aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls="answer-suggestions"
         autoComplete="off"
       />
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="answer-suggestions"
+            role="listbox"
+            aria-label="Suggerimenti"
             className="absolute bottom-full z-50 mb-1 max-h-64 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-2xl"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
