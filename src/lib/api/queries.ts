@@ -9,6 +9,7 @@ import {
   getArtistTop,
 } from "./deezer-client"
 import { getClassicPool, getTimedPool, getChallengePool, getDecadePool } from "./track-pool"
+import type { Difficulty } from "@/types/game"
 
 const STALE_TIME_CHART = 1000 * 60 * 30
 const STALE_TIME_SEARCH = 0
@@ -53,11 +54,12 @@ export const useArtistTop = (artistId: number, enabled: boolean = true) =>
 
 export const useClassicPool = (
   sessionId: number,
+  difficulty: Difficulty = "medium",
   enabled: boolean = true
 ) =>
   useQuery({
-    queryKey: ["pool", "classic", sessionId],
-    queryFn: () => getClassicPool(),
+    queryKey: ["pool", "classic", difficulty, sessionId],
+    queryFn: () => getClassicPool(difficulty),
     enabled,
     staleTime: 0,
     gcTime: 0,
@@ -65,11 +67,12 @@ export const useClassicPool = (
 
 export const useTimedPool = (
   sessionId: number,
+  difficulty: Difficulty = "medium",
   enabled: boolean = true
 ) =>
   useQuery({
-    queryKey: ["pool", "timed", sessionId],
-    queryFn: () => getTimedPool(),
+    queryKey: ["pool", "timed", difficulty, sessionId],
+    queryFn: () => getTimedPool(difficulty),
     enabled,
     staleTime: 0,
     gcTime: 0,
@@ -78,11 +81,12 @@ export const useTimedPool = (
 export const useChallengePool = (
   genreId: number,
   sessionId: number,
+  difficulty: Difficulty = "medium",
   enabled: boolean = true
 ) =>
   useQuery({
-    queryKey: ["pool", "challenge", genreId, sessionId],
-    queryFn: () => getChallengePool(genreId),
+    queryKey: ["pool", "challenge", genreId, difficulty, sessionId],
+    queryFn: () => getChallengePool(genreId, difficulty),
     enabled,
     staleTime: 0,
     gcTime: 0,
@@ -91,11 +95,12 @@ export const useChallengePool = (
 export const useDecadePool = (
   decade: number,
   sessionId: number,
+  difficulty: Difficulty = "medium",
   enabled: boolean = true
 ) =>
   useQuery({
-    queryKey: ["pool", "decade", decade, sessionId],
-    queryFn: () => getDecadePool(decade),
+    queryKey: ["pool", "decade", decade, difficulty, sessionId],
+    queryFn: () => getDecadePool(decade, difficulty),
     enabled,
     staleTime: 0,
     gcTime: 0,

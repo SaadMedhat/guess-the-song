@@ -2,6 +2,8 @@ import type { DeezerTrack } from "./deezer"
 
 export type GameMode = "classic" | "timed" | "challenge" | "local"
 
+export type Difficulty = "easy" | "medium" | "hard"
+
 export type GamePhase =
   | "IDLE"
   | "LOADING_TRACKS"
@@ -28,6 +30,7 @@ export type GameConfig = {
   readonly totalRounds: number
   readonly timePerRound: number
   readonly maxSkips: number
+  readonly difficulty?: Difficulty | undefined
   readonly challenge?: ChallengeConfig | undefined
   readonly playerNames?: ReadonlyArray<string> | undefined
 }
@@ -115,6 +118,7 @@ export type LocalGameState = {
   readonly players: ReadonlyArray<Player>
   readonly currentRound: number
   readonly totalRounds: number
+  readonly difficulty: Difficulty
   readonly trackPool: ReadonlyArray<DeezerTrack>
   readonly currentTrack: DeezerTrack | null
   readonly answeringPlayerId: string | null

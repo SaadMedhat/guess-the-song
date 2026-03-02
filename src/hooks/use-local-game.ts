@@ -4,6 +4,7 @@ import { useState, useCallback } from "react"
 import type { DeezerTrack } from "@/types/deezer"
 import type {
   Player,
+  Difficulty,
   LocalGamePhase,
   LocalGameState,
   LocalRoundResult,
@@ -30,6 +31,7 @@ const INITIAL_STATE: LocalGameState = {
   players: [],
   currentRound: 0,
   totalRounds: TOTAL_ROUNDS,
+  difficulty: "medium",
   trackPool: [],
   currentTrack: null,
   answeringPlayerId: null,
@@ -41,7 +43,8 @@ type UseLocalGameReturn = {
   readonly state: LocalGameState
   readonly startGame: (
     playerNames: ReadonlyArray<string>,
-    tracks: ReadonlyArray<DeezerTrack>
+    tracks: ReadonlyArray<DeezerTrack>,
+    difficulty?: Difficulty
   ) => void
   readonly beginRound: () => void
   readonly buzz: (playerId: string) => boolean
@@ -62,7 +65,8 @@ export const useLocalGame = (): UseLocalGameReturn => {
   const startGame = useCallback(
     (
       playerNames: ReadonlyArray<string>,
-      tracks: ReadonlyArray<DeezerTrack>
+      tracks: ReadonlyArray<DeezerTrack>,
+      difficulty: Difficulty = "medium"
     ): void => {
       const players = createPlayers(playerNames)
       const firstTrack = tracks[0]
@@ -74,6 +78,7 @@ export const useLocalGame = (): UseLocalGameReturn => {
         players,
         currentRound: 1,
         totalRounds: TOTAL_ROUNDS,
+        difficulty,
         trackPool: tracks,
         currentTrack: firstTrack,
       })
@@ -140,6 +145,7 @@ export const useLocalGame = (): UseLocalGameReturn => {
             timeRemaining,
             totalTime: BUZZER_ANSWER_TIME,
             streak: newStreak,
+            difficulty: prev.difficulty,
           })
 
           const updatedPlayers = prev.players.map((p) => {

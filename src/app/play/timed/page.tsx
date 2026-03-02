@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGameEngine } from "@/hooks/use-game-engine"
 import { useAudioPlayer } from "@/hooks/use-audio-player"
@@ -21,14 +21,44 @@ import { GameOver } from "@/components/game/game-over"
 import { MultiplierBadge } from "@/components/game/multiplier-badge"
 import { StepProgress } from "@/components/game/step-progress"
 import { fadeIn, slideInUp } from "@/lib/motion"
+import type { Difficulty } from "@/types/game"
 
 const TIME_PER_STEP = 15
 const FEEDBACK_DELAY_CORRECT = 2000
 const FEEDBACK_DELAY_WRONG = 2500
 const LAST_STEP_INDEX = TIMED_STEPS.length - 1
 
+const VALID_DIFFICULTIES = new Set<string>(["easy", "medium", "hard"])
+
+const useDifficulty = (): Difficulty => {
+  const searchParams = useSearchParams()
+  return useMemo(() => {
+    const raw = searchParams.get("difficulty")
+    if (raw !== null && VALID_DIFFICULTIES.has(raw)) return raw as Difficulty
+    return "medium"
+  }, [searchParams])
+}
+
 export default function TimedPage(): React.ReactElement {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-game px-5">
+          <AudioVisualizer isPlaying barCount={20} />
+          <p className="font-display text-lg font-semibold text-foreground">
+            Caricamento...
+          </p>
+        </main>
+      }
+    >
+      <TimedContent />
+    </Suspense>
+  )
+}
+
+function TimedContent(): React.ReactElement {
   const router = useRouter()
+  const difficulty = useDifficulty()
   const {
     state,
     startGame,
@@ -95,7 +125,7 @@ export default function TimedPage(): React.ReactElement {
     data: trackPool,
     isLoading,
     isError,
-  } = useTimedPool(sessionId)
+  } = useTimedPool(sessionId, difficulty)
 
   // Start game when pool is ready
   useEffect(() => {
@@ -110,9 +140,10 @@ export default function TimedPage(): React.ReactElement {
         totalRounds: 10,
         timePerRound: TIME_PER_STEP,
         maxSkips: 0,
+        difficulty,
       })
     }
-  }, [trackPool, startGame, setInGame])
+  }, [trackPool, difficulty, startGame, setInGame])
 
   // Auto-play first round when game is READY
   useEffect(() => {

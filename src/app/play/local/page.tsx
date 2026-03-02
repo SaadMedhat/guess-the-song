@@ -10,7 +10,7 @@ import { useClassicPool } from "@/lib/api/queries"
 import { useGameStore } from "@/lib/stores/game-store"
 import { useStatsStore } from "@/lib/stores/stats-store"
 import { BUZZER_ANSWER_TIME } from "@/types/game"
-import type { RoundResult, LocalRoundResult } from "@/types/game"
+import type { RoundResult, LocalRoundResult, Difficulty } from "@/types/game"
 import { TimerBar } from "@/components/game/timer-bar"
 import { RoundIndicator } from "@/components/game/round-indicator"
 import { AudioVisualizer } from "@/components/game/audio-visualizer"
@@ -21,6 +21,17 @@ import { BuzzerPanel } from "@/components/game/buzzer-panel"
 import { PlayerScoreboard } from "@/components/game/player-scoreboard"
 import { LocalGameOver } from "@/components/game/local-game-over"
 import { fadeIn, slideInUp } from "@/lib/motion"
+
+const VALID_DIFFICULTIES = new Set<string>(["easy", "medium", "hard"])
+
+const useDifficulty = (): Difficulty => {
+  const searchParams = useSearchParams()
+  return useMemo(() => {
+    const raw = searchParams.get("difficulty")
+    if (raw !== null && VALID_DIFFICULTIES.has(raw)) return raw as Difficulty
+    return "medium"
+  }, [searchParams])
+}
 
 const BUZZER_WINDOW = 30
 const FEEDBACK_DELAY_CORRECT = 2000
@@ -80,6 +91,7 @@ export default function LocalPage(): React.ReactElement {
 function LocalContent(): React.ReactElement {
   const router = useRouter()
   const playerNames = usePlayerNames()
+  const difficulty = useDifficulty()
 
   const {
     state,
@@ -138,7 +150,7 @@ function LocalContent(): React.ReactElement {
     data: trackPool,
     isLoading,
     isError,
-  } = useClassicPool(sessionId)
+  } = useClassicPool(sessionId, difficulty)
 
   // Start game when pool is ready
   useEffect(() => {
@@ -150,9 +162,9 @@ function LocalContent(): React.ReactElement {
     ) {
       hasStartedRef.current = true
       setInGame(true)
-      startGame(playerNames, trackPool)
+      startGame(playerNames, trackPool, difficulty)
     }
-  }, [trackPool, playerNames, startGame, setInGame])
+  }, [trackPool, playerNames, difficulty, startGame, setInGame])
 
   // Auto-begin round when READY
   useEffect(() => {

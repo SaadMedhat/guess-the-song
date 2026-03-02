@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGameEngine } from "@/hooks/use-game-engine"
 import { useAudioPlayer } from "@/hooks/use-audio-player"
@@ -18,13 +18,43 @@ import { AnswerInput } from "@/components/game/answer-input"
 import { ResultFeedback } from "@/components/game/result-feedback"
 import { GameOver } from "@/components/game/game-over"
 import { fadeIn, slideInUp } from "@/lib/motion"
+import type { Difficulty } from "@/types/game"
 
 const TIME_PER_ROUND = 30
 const FEEDBACK_DELAY_CORRECT = 2000
 const FEEDBACK_DELAY_WRONG = 2500
 
+const VALID_DIFFICULTIES = new Set<string>(["easy", "medium", "hard"])
+
+const useDifficulty = (): Difficulty => {
+  const searchParams = useSearchParams()
+  return useMemo(() => {
+    const raw = searchParams.get("difficulty")
+    if (raw !== null && VALID_DIFFICULTIES.has(raw)) return raw as Difficulty
+    return "medium"
+  }, [searchParams])
+}
+
 export default function ClassicPage(): React.ReactElement {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-game px-5">
+          <AudioVisualizer isPlaying barCount={20} />
+          <p className="font-display text-lg font-semibold text-foreground">
+            Caricamento...
+          </p>
+        </main>
+      }
+    >
+      <ClassicContent />
+    </Suspense>
+  )
+}
+
+function ClassicContent(): React.ReactElement {
   const router = useRouter()
+  const difficulty = useDifficulty()
   const {
     state,
     startGame,
@@ -63,7 +93,7 @@ export default function ClassicPage(): React.ReactElement {
     data: trackPool,
     isLoading,
     isError,
-  } = useClassicPool(sessionId)
+  } = useClassicPool(sessionId, difficulty)
 
   // Start game when pool is ready
   useEffect(() => {
@@ -78,9 +108,10 @@ export default function ClassicPage(): React.ReactElement {
         totalRounds: 10,
         timePerRound: TIME_PER_ROUND,
         maxSkips: 3,
+        difficulty,
       })
     }
-  }, [trackPool, startGame, setInGame])
+  }, [trackPool, difficulty, startGame, setInGame])
 
   // Auto-play first round when game is READY
   useEffect(() => {

@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { DEEZER_GENRES, GENRE_LABELS, DECADES } from "@/lib/constants"
+import { DifficultyChips } from "@/components/modes/difficulty-chips"
+import type { Difficulty } from "@/types/game"
 
 type PickerTab = "genre" | "decade"
 
@@ -23,6 +25,7 @@ export const GenrePicker = ({
   const [activeTab, setActiveTab] = useState<PickerTab>("genre")
   const [selectedGenre, setSelectedGenre] = useState<number | null>(null)
   const [selectedDecade, setSelectedDecade] = useState<number | null>(null)
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium")
 
   const canPlay =
     (activeTab === "genre" && selectedGenre !== null) ||
@@ -30,11 +33,11 @@ export const GenrePicker = ({
 
   const handlePlay = (): void => {
     if (activeTab === "genre" && selectedGenre !== null) {
-      router.push(`/play/challenge?genre=${selectedGenre}`)
+      router.push(`/play/challenge?genre=${selectedGenre}&difficulty=${difficulty}`)
       return
     }
     if (activeTab === "decade" && selectedDecade !== null) {
-      router.push(`/play/challenge?decade=${selectedDecade}`)
+      router.push(`/play/challenge?decade=${selectedDecade}&difficulty=${difficulty}`)
     }
   }
 
@@ -133,6 +136,9 @@ export const GenrePicker = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Difficulty */}
+      <DifficultyChips value={difficulty} onChange={setDifficulty} />
 
       {/* Actions */}
       <div className="flex gap-2">

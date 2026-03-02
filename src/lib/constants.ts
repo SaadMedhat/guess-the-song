@@ -40,6 +40,24 @@ export const DECADES = [
   { value: 2020, label: "Anni 2020" },
 ] as const
 
+export const DIFFICULTY_CONFIG = {
+  easy: {
+    label: "Facile",
+    description: "Hit popolari e riconoscibili",
+    scoreMultiplier: 0.8,
+  },
+  medium: {
+    label: "Normale",
+    description: "Mix di brani famosi e meno noti",
+    scoreMultiplier: 1.0,
+  },
+  hard: {
+    label: "Difficile",
+    description: "Brani di nicchia e deep cuts",
+    scoreMultiplier: 1.5,
+  },
+} as const
+
 export const GAME_MODE_CONFIG = {
   classic: {
     label: "Classica",

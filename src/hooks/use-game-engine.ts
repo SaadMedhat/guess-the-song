@@ -149,6 +149,7 @@ export const useGameEngine = (): UseGameEngineReturn => {
         totalTime,
         streak: newStreak,
         timedStep: current.mode === "timed" ? current.timedStep : undefined,
+        difficulty: current.config.difficulty,
       })
 
       const result = createRoundResult({

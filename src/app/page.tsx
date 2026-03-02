@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Nav } from "@/components/layout/nav"
 import { ModeCard } from "@/components/modes/mode-card"
+import { DifficultyPicker } from "@/components/modes/difficulty-picker"
 import { GenrePicker } from "@/components/modes/genre-picker"
 import { PlayerSetup } from "@/components/modes/player-setup"
 import { HeroVisualizer } from "@/components/modes/hero-visualizer"
 import { staggerContainer, slideInUp } from "@/lib/motion"
-import type { GameMode } from "@/types/game"
+import type { GameMode, Difficulty } from "@/types/game"
 
-type ExpandedPanel = "challenge" | "local" | null
+type ExpandedPanel = "classic" | "timed" | "challenge" | "local" | null
 
 const MODE_DATA: ReadonlyArray<{
   readonly mode: GameMode
@@ -56,21 +57,14 @@ export default function HomePage(): React.ReactElement {
 
   const handleModeClick = useCallback(
     (mode: GameMode): void => {
-      if (mode === "classic") {
-        router.push("/play/classic")
-        return
-      }
-      if (mode === "timed") {
-        router.push("/play/timed")
-        return
-      }
-      if (mode === "challenge") {
-        setExpandedPanel((prev) => (prev === "challenge" ? null : "challenge"))
-        return
-      }
-      if (mode === "local") {
-        setExpandedPanel((prev) => (prev === "local" ? null : "local"))
-      }
+      setExpandedPanel((prev) => (prev === mode ? null : mode as ExpandedPanel))
+    },
+    []
+  )
+
+  const handleDifficultySelect = useCallback(
+    (mode: "classic" | "timed", difficulty: Difficulty): void => {
+      router.push(`/play/${mode}?difficulty=${difficulty}`)
     },
     [router]
   )
@@ -142,6 +136,20 @@ export default function HomePage(): React.ReactElement {
 
                 {/* Inline expansion panels */}
                 <AnimatePresence>
+                  {data.mode === "classic" &&
+                    expandedPanel === "classic" && (
+                      <DifficultyPicker
+                        onSelect={(d): void => handleDifficultySelect("classic", d)}
+                        onClose={closePanel}
+                      />
+                    )}
+                  {data.mode === "timed" &&
+                    expandedPanel === "timed" && (
+                      <DifficultyPicker
+                        onSelect={(d): void => handleDifficultySelect("timed", d)}
+                        onClose={closePanel}
+                      />
+                    )}
                   {data.mode === "challenge" &&
                     expandedPanel === "challenge" && (
                       <GenrePicker onClose={closePanel} />

@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { DifficultyChips } from "@/components/modes/difficulty-chips"
+import type { Difficulty } from "@/types/game"
 
 const MIN_PLAYERS = 2
 const MAX_PLAYERS = 4
@@ -21,6 +23,7 @@ export const PlayerSetup = ({
 }): React.ReactElement => {
   const router = useRouter()
   const [names, setNames] = useState<ReadonlyArray<string>>(["", ""])
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium")
 
   const updateName = useCallback(
     (index: number, value: string): void => {
@@ -53,6 +56,7 @@ export const PlayerSetup = ({
     validNames.forEach((name, i) => {
       params.append(`p${i + 1}`, name.trim())
     })
+    params.append("difficulty", difficulty)
     router.push(`/play/local?${params.toString()}`)
   }
 
@@ -117,6 +121,9 @@ export const PlayerSetup = ({
           <span>Aggiungi giocatore</span>
         </button>
       )}
+
+      {/* Difficulty */}
+      <DifficultyChips value={difficulty} onChange={setDifficulty} />
 
       {/* Actions */}
       <div className="flex gap-2">

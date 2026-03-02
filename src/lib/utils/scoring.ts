@@ -1,5 +1,6 @@
-import type { TimedStep } from "@/types/game"
+import type { TimedStep, Difficulty } from "@/types/game"
 import { TIMED_MULTIPLIERS } from "@/types/game"
+import { DIFFICULTY_CONFIG } from "@/lib/constants"
 
 const SCORE_BASE = 100
 const STREAK_BONUS_PER = 10
@@ -11,6 +12,7 @@ type ScoreParams = {
   readonly totalTime: number
   readonly streak: number
   readonly timedStep?: TimedStep | undefined
+  readonly difficulty?: Difficulty | undefined
 }
 
 export type ScoreBreakdown = {
@@ -18,6 +20,7 @@ export type ScoreBreakdown = {
   readonly timeBonus: number
   readonly streakBonus: number
   readonly multiplier: number
+  readonly difficultyMultiplier: number
   readonly total: number
 }
 
@@ -26,7 +29,7 @@ export type ScoreBreakdown = {
  */
 export const calculateScore = (params: ScoreParams): ScoreBreakdown => {
   if (!params.isCorrect) {
-    return { base: 0, timeBonus: 0, streakBonus: 0, multiplier: 1, total: 0 }
+    return { base: 0, timeBonus: 0, streakBonus: 0, multiplier: 1, difficultyMultiplier: 1, total: 0 }
   }
 
   const base = SCORE_BASE
@@ -43,7 +46,12 @@ export const calculateScore = (params: ScoreParams): ScoreBreakdown => {
       ? (TIMED_MULTIPLIERS[params.timedStep] ?? 1)
       : 1
 
-  const total = Math.round((base + timeBonus + streakBonus) * multiplier)
+  const difficultyMultiplier =
+    params.difficulty !== undefined
+      ? DIFFICULTY_CONFIG[params.difficulty].scoreMultiplier
+      : 1
 
-  return { base, timeBonus, streakBonus, multiplier, total }
+  const total = Math.round((base + timeBonus + streakBonus) * multiplier * difficultyMultiplier)
+
+  return { base, timeBonus, streakBonus, multiplier, difficultyMultiplier, total }
 }

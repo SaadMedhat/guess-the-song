@@ -19,6 +19,7 @@ import { AnswerInput } from "@/components/game/answer-input"
 import { ResultFeedback } from "@/components/game/result-feedback"
 import { GameOver } from "@/components/game/game-over"
 import { fadeIn, slideInUp } from "@/lib/motion"
+import type { Difficulty } from "@/types/game"
 
 const TIME_PER_ROUND = 30
 const FEEDBACK_DELAY_CORRECT = 2000
@@ -27,17 +28,25 @@ const FEEDBACK_DELAY_WRONG = 2500
 /**
  * Parse search params to determine challenge type.
  */
+const VALID_DIFFICULTIES = new Set<string>(["easy", "medium", "hard"])
+
 const useChallengeParams = (): {
   readonly type: "genre" | "decade" | null
   readonly genreId: number | null
   readonly decade: number | null
   readonly label: string
+  readonly difficulty: Difficulty
 } => {
   const searchParams = useSearchParams()
 
   return useMemo(() => {
     const genreRaw = searchParams.get("genre")
     const decadeRaw = searchParams.get("decade")
+    const diffRaw = searchParams.get("difficulty")
+    const difficulty: Difficulty =
+      diffRaw !== null && VALID_DIFFICULTIES.has(diffRaw)
+        ? (diffRaw as Difficulty)
+        : "medium"
 
     if (genreRaw !== null) {
       const genreId = Number(genreRaw)
@@ -47,6 +56,7 @@ const useChallengeParams = (): {
           genreId,
           decade: null,
           label: GENRE_LABELS[genreId] ?? "Sfida",
+          difficulty,
         }
       }
     }
@@ -60,11 +70,12 @@ const useChallengeParams = (): {
           genreId: null,
           decade,
           label: decadeEntry?.label ?? `${decade}s`,
+          difficulty,
         }
       }
     }
 
-    return { type: null, genreId: null, decade: null, label: "" }
+    return { type: null, genreId: null, decade: null, label: "", difficulty }
   }, [searchParams])
 }
 
@@ -87,7 +98,7 @@ export default function ChallengePage(): React.ReactElement {
 
 function ChallengeContent(): React.ReactElement {
   const router = useRouter()
-  const { type, genreId, decade, label } = useChallengeParams()
+  const { type, genreId, decade, label, difficulty } = useChallengeParams()
 
   const {
     state,
@@ -123,8 +134,8 @@ function ChallengeContent(): React.ReactElement {
   })
 
   // Fetch track pool based on challenge type
-  const genrePool = useChallengePool(genreId ?? 0, sessionId, type === "genre" && genreId !== null)
-  const decadePool = useDecadePool(decade ?? 0, sessionId, type === "decade" && decade !== null)
+  const genrePool = useChallengePool(genreId ?? 0, sessionId, difficulty, type === "genre" && genreId !== null)
+  const decadePool = useDecadePool(decade ?? 0, sessionId, difficulty, type === "decade" && decade !== null)
 
   const activePool = type === "genre" ? genrePool : decadePool
   const trackPool = activePool.data
@@ -151,9 +162,10 @@ function ChallengeContent(): React.ReactElement {
         totalRounds: 10,
         timePerRound: TIME_PER_ROUND,
         maxSkips: 3,
+        difficulty,
       })
     }
-  }, [trackPool, startGame, setInGame])
+  }, [trackPool, difficulty, startGame, setInGame])
 
   // Auto-play first round when game is READY
   useEffect(() => {
