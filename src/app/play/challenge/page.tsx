@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useCallback, useRef, useMemo } from "react"
+import { Suspense, useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGameEngine } from "@/hooks/use-game-engine"
@@ -105,6 +105,7 @@ function ChallengeContent(): React.ReactElement {
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hasStartedRef = useRef(false)
   const hasRecordedRef = useRef(false)
+  const [sessionId, setSessionId] = useState(0)
 
   const handleTimeout = useCallback((): void => {
     if (
@@ -122,14 +123,13 @@ function ChallengeContent(): React.ReactElement {
   })
 
   // Fetch track pool based on challenge type
-  const genrePool = useChallengePool(genreId ?? 0, type === "genre" && genreId !== null)
-  const decadePool = useDecadePool(decade ?? 0, type === "decade" && decade !== null)
+  const genrePool = useChallengePool(genreId ?? 0, sessionId, type === "genre" && genreId !== null)
+  const decadePool = useDecadePool(decade ?? 0, sessionId, type === "decade" && decade !== null)
 
   const activePool = type === "genre" ? genrePool : decadePool
   const trackPool = activePool.data
   const isLoading = activePool.isLoading
   const isError = activePool.isError
-  const refetch = activePool.refetch
 
   // Redirect if no valid params
   useEffect(() => {
@@ -265,8 +265,8 @@ function ChallengeContent(): React.ReactElement {
     hasStartedRef.current = false
     hasRecordedRef.current = false
     resetGame()
-    refetch()
-  }, [resetGame, refetch])
+    setSessionId((prev) => prev + 1)
+  }, [resetGame])
 
   const handleHome = useCallback((): void => {
     resetGame()
@@ -347,7 +347,7 @@ function ChallengeContent(): React.ReactElement {
             <button
               type="button"
               onClick={(): void => {
-                refetch()
+                setSessionId((prev) => prev + 1)
               }}
               className="rounded-xl bg-primary px-6 py-2.5 font-display text-sm font-bold text-primary-foreground"
             >

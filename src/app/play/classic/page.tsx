@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGameEngine } from "@/hooks/use-game-engine"
@@ -41,6 +41,7 @@ export default function ClassicPage(): React.ReactElement {
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hasStartedRef = useRef(false)
   const hasRecordedRef = useRef(false)
+  const [sessionId, setSessionId] = useState(0)
 
   const handleTimeout = useCallback((): void => {
     if (
@@ -62,8 +63,7 @@ export default function ClassicPage(): React.ReactElement {
     data: trackPool,
     isLoading,
     isError,
-    refetch,
-  } = useClassicPool()
+  } = useClassicPool(sessionId)
 
   // Start game when pool is ready
   useEffect(() => {
@@ -192,8 +192,8 @@ export default function ClassicPage(): React.ReactElement {
     hasStartedRef.current = false
     hasRecordedRef.current = false
     resetGame()
-    refetch()
-  }, [resetGame, refetch])
+    setSessionId((prev) => prev + 1)
+  }, [resetGame])
 
   const handleHome = useCallback((): void => {
     resetGame()
@@ -267,7 +267,7 @@ export default function ClassicPage(): React.ReactElement {
             <button
               type="button"
               onClick={(): void => {
-                refetch()
+                setSessionId((prev) => prev + 1)
               }}
               className="rounded-xl bg-primary px-6 py-2.5 font-display text-sm font-bold text-primary-foreground"
             >

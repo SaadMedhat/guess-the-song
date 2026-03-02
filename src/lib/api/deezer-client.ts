@@ -30,13 +30,18 @@ const fetchDeezer = async <T>(
 export const searchTracks = (query: string): Promise<DeezerSearchResponse> =>
   fetchDeezer<DeezerSearchResponse>("search", { q: query })
 
-export const getChart = (): Promise<DeezerChartResponse> =>
-  fetchDeezer<DeezerChartResponse>("chart")
+export const getChart = (
+  limit: number = 100
+): Promise<DeezerChartResponse> =>
+  fetchDeezer<DeezerChartResponse>("chart", { limit: String(limit) })
 
 export const getGenreChart = (
-  genreId: number
+  genreId: number,
+  limit: number = 100
 ): Promise<DeezerChartResponse> =>
-  fetchDeezer<DeezerChartResponse>(`chart/${genreId}`)
+  fetchDeezer<DeezerChartResponse>(`chart/${genreId}`, {
+    limit: String(limit),
+  })
 
 export const getGenres = (): Promise<DeezerGenreListResponse> =>
   fetchDeezer<DeezerGenreListResponse>("genre")

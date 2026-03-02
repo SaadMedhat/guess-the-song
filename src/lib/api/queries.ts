@@ -24,7 +24,7 @@ export const useSearchTracks = (query: string, enabled: boolean = true) =>
 export const useChart = () =>
   useQuery({
     queryKey: ["deezer", "chart"],
-    queryFn: getChart,
+    queryFn: () => getChart(),
     staleTime: STALE_TIME_CHART,
   })
 
@@ -51,18 +51,24 @@ export const useArtistTop = (artistId: number, enabled: boolean = true) =>
     staleTime: STALE_TIME_CHART,
   })
 
-export const useClassicPool = (enabled: boolean = true) =>
+export const useClassicPool = (
+  sessionId: number,
+  enabled: boolean = true
+) =>
   useQuery({
-    queryKey: ["pool", "classic"],
+    queryKey: ["pool", "classic", sessionId],
     queryFn: () => getClassicPool(),
     enabled,
     staleTime: 0,
     gcTime: 0,
   })
 
-export const useTimedPool = (enabled: boolean = true) =>
+export const useTimedPool = (
+  sessionId: number,
+  enabled: boolean = true
+) =>
   useQuery({
-    queryKey: ["pool", "timed"],
+    queryKey: ["pool", "timed", sessionId],
     queryFn: () => getTimedPool(),
     enabled,
     staleTime: 0,
@@ -71,19 +77,24 @@ export const useTimedPool = (enabled: boolean = true) =>
 
 export const useChallengePool = (
   genreId: number,
+  sessionId: number,
   enabled: boolean = true
 ) =>
   useQuery({
-    queryKey: ["pool", "challenge", genreId],
+    queryKey: ["pool", "challenge", genreId, sessionId],
     queryFn: () => getChallengePool(genreId),
     enabled,
     staleTime: 0,
     gcTime: 0,
   })
 
-export const useDecadePool = (decade: number, enabled: boolean = true) =>
+export const useDecadePool = (
+  decade: number,
+  sessionId: number,
+  enabled: boolean = true
+) =>
   useQuery({
-    queryKey: ["pool", "decade", decade],
+    queryKey: ["pool", "decade", decade, sessionId],
     queryFn: () => getDecadePool(decade),
     enabled,
     staleTime: 0,

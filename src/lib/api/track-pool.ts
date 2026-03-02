@@ -1,6 +1,7 @@
 import type { DeezerTrack } from "@/types/deezer"
 import { getChart, getGenreChart, searchTracks } from "./deezer-client"
 import { fisherYatesShuffle } from "@/lib/utils/shuffle"
+import { DEEZER_GENRES } from "@/lib/constants"
 
 const DEFAULT_POOL_SIZE = 10
 
@@ -32,13 +33,51 @@ const pickTracks = (
 }
 
 /**
- * Get track pool from the global chart (Classic & Timed modes).
+ * Pick random items from an array.
+ */
+const pickRandom = <T>(arr: ReadonlyArray<T>, count: number): ReadonlyArray<T> =>
+  fisherYatesShuffle(arr).slice(0, count)
+
+/**
+ * Popular search terms to supplement chart data with varied tracks.
+ */
+const POPULAR_SEARCH_TERMS = [
+  "hit 2024", "hit 2025", "hit 2023",
+  "top songs", "popular music",
+  "summer hits", "dance hits",
+  "best songs 2020s", "viral hits",
+  "party music", "workout music",
+  "chill hits", "love songs popular",
+  "trending music", "global top",
+] as const
+
+/**
+ * Genre IDs to randomly sample from for variety.
+ */
+const GENRE_IDS = Object.values(DEEZER_GENRES)
+
+/**
+ * Get track pool from multiple sources for maximum variety.
+ * Combines global chart + random genre charts + random search queries.
  */
 export const getClassicPool = async (
   count: number = DEFAULT_POOL_SIZE
 ): Promise<ReadonlyArray<DeezerTrack>> => {
-  const chart = await getChart()
-  return pickTracks(chart.tracks.data, count)
+  const randomGenres = pickRandom(GENRE_IDS, 2)
+  const randomSearches = pickRandom(POPULAR_SEARCH_TERMS, 2)
+
+  const [mainChart, ...extras] = await Promise.all([
+    getChart(100),
+    ...randomGenres.map((genreId) => getGenreChart(genreId, 50).then((r) => r.tracks.data)),
+    ...randomSearches.map((term) => searchTracks(term).then((r) => r.data)),
+  ])
+
+  const allTracks = [
+    ...mainChart.tracks.data,
+    ...extras.flat(),
+  ]
+
+  return pickTracks(allTracks, count)
 }
 
 /**
@@ -47,14 +86,23 @@ export const getClassicPool = async (
 export const getTimedPool = getClassicPool
 
 /**
- * Get track pool filtered by genre chart.
+ * Get track pool filtered by genre chart + supplementary searches.
  */
 export const getChallengePool = async (
   genreId: number,
   count: number = DEFAULT_POOL_SIZE
 ): Promise<ReadonlyArray<DeezerTrack>> => {
-  const chart = await getGenreChart(genreId)
-  return pickTracks(chart.tracks.data, count)
+  const [chart, searchResult] = await Promise.all([
+    getGenreChart(genreId, 100),
+    searchTracks(`top ${genreId} hits`),
+  ])
+
+  const allTracks = [
+    ...chart.tracks.data,
+    ...searchResult.data,
+  ]
+
+  return pickTracks(allTracks, count)
 }
 
 /**
@@ -68,6 +116,7 @@ export const getDecadePool = async (
     `top hits ${decade}s`,
     `best songs ${decade}s`,
     `greatest hits ${decade}`,
+    `classic ${decade}s music`,
   ]
 
   const results = await Promise.all(

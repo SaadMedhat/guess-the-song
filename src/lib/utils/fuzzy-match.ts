@@ -57,6 +57,8 @@ const isFuzzyWordMatch = (answer: string, target: string): boolean => {
   if (normalizedAnswer === normalizedTarget) return true
   if (normalizedTarget.includes(normalizedAnswer) && normalizedAnswer.length >= 3)
     return true
+  if (normalizedAnswer.includes(normalizedTarget) && normalizedTarget.length >= 3)
+    return true
 
   const distance = levenshtein(normalizedAnswer, normalizedTarget)
   const maxDist = getMaxDistance(normalizedTarget)
